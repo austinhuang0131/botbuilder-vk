@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
 var builder = require('botbuilder'),
     VK = require("VK-Promise"),
+    https = require("https"),
     channelId = "sms";
 function Create(options) {
     options = Object.assign({channelId: channelId}, options);
@@ -14,7 +15,21 @@ function Create(options) {
     };
     vk.send = function(messages, cb){
         Promise.all(
-            messages.map(msg => vk.messages.send({peer_id: msg.address.user.id, message: msg.text}))
+            messages.forEach(msg => {
+                if (msg.attachments) {
+                    msg.attachments.filter(attachment => {
+                        return attachment.contentType.match(/^image\//) && typeof attachment.contentUrl === "string"
+                    }).forEach(a => {
+                        https.get(a.contentUrl,function(stream){
+                            stream.filename = "filename.png";
+                            vk.upload.messagesPhoto(stream, {peer_id: msg.address.user.id}).then(p => {
+                                vk.messages.send({peer_id: msg.address.user.id, attachment: "photo"+p[0].owner_id+"_"+p[0].id});
+                            }, console.error);
+                        });
+                    });
+                }
+                vk.messages.send({peer_id: msg.address.user.id, message: msg.text});
+            })
         ).then(cb.bind(this, null), cb);
     };
     vk.processMessage = function(message){
