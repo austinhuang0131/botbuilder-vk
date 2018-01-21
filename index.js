@@ -2,6 +2,7 @@
 var builder = require('botbuilder'),
     VK = require("VK-Promise"),
     https = require("https"),
+    http = require("http"),
     channelId = "sms";
 function Create(options) {
     options = Object.assign({channelId: channelId}, options);
@@ -20,7 +21,9 @@ function Create(options) {
                     msg.attachments.filter(attachment => {
                         return attachment.contentType.match(/^image\//) && typeof attachment.contentUrl === "string"
                     }).forEach(a => {
-                        https.get(a.contentUrl,function(stream){
+                        var client = http;
+                        if (a.contentUrl.match(/^https:\/\//g)) client = https;
+                        client.get(a.contentUrl,function(stream){
                             stream.filename = "filename.png";
                             vk.upload.messagesPhoto(stream, {peer_id: msg.address.user.id}).then(p => {
                                 vk.messages.send({peer_id: msg.address.user.id, attachment: "photo"+p[0].owner_id+"_"+p[0].id});
