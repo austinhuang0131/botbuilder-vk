@@ -1,0 +1,11 @@
+{
+    "description": "botbuilder-vk",
+    "name": "botbuilder-vk",
+    "readme": "README.md",
+    "scripts": {},
+    "version": "0.2.4",
+    "dependencies": {
+        "botbuilder": "*",
+        "VK-Promise": "*"
+    }
+}
