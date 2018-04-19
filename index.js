@@ -52,7 +52,7 @@ function Create(options) {
         return vk;
     };
     vk.on("message",function (e, msg) {
-        e.ok();
+        // e.ok();
         vk.processMessage(msg);
     });
     Object.assign(vk, options);
